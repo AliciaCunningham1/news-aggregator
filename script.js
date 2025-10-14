@@ -62,25 +62,26 @@ NewsFeed.prototype = {
 const newsFeed = new NewsFeed();
 
 function updateHeadline(article) {
-    const headlineElement = document.getElementById('headline').querySelector('p');
-    headlineElement.textContent = article.title;
+    const headlineElement = document.getElementById('headline')?.querySelector('p');
+    if (headlineElement) headlineElement.textContent = article.title;
 }
 
 function updateArticleList(article) {
     const articleListElement = document.getElementById('articles');
-    const listItem = document.createElement('li');
-    listItem.textContent = article.title;
-    articleListElement.appendChild(listItem);
+    if (articleListElement) {
+        const listItem = document.createElement('li');
+        listItem.textContent = article.title;
+        articleListElement.appendChild(listItem);
+    }
 }
 
 newsFeed.subscribe(updateHeadline);
 newsFeed.subscribe(updateArticleList);
 
 NewsFetcher.getArticles().then(articles => {
-    articles.forEach(article => {
-        newsFeed.addArticle(article);
-    });
+    articles.forEach(article => newsFeed.addArticle(article));
 });
 
-const configInfo = ConfigManager.getInstance();
-document.getElementById('configInfo').textContent = `Theme: ${configInfo.theme}`;
+const configInfo = document.getElementById('configInfo');
+if (configInfo) configInfo.textContent = `Theme: ${ConfigManager.getInstance().theme}`;
+
