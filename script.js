@@ -21,10 +21,11 @@ const ConfigManager = (function() {
 
 const NewsFetcher = (function () {
     const config = ConfigManager.getInstance();
+    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
 
     async function fetchArticles() {
         try {
-            const response = await fetch(`${config.apiUrl}?country=us&apiKey=${config.apiKey}`);
+            const response = await fetch(proxyUrl + `${config.apiUrl}?country=us&apiKey=${config.apiKey}`);
             const data = await response.json();
             return data.articles || [];
         } catch (error) {
@@ -70,7 +71,11 @@ function updateArticleList(article) {
     const articleListElement = document.getElementById('articles');
     if (articleListElement) {
         const listItem = document.createElement('li');
-        listItem.textContent = article.title;
+        const link = document.createElement('a');
+        link.href = article.url;
+        link.target = '_blank';
+        link.textContent = article.title;
+        listItem.appendChild(link);
         articleListElement.appendChild(listItem);
     }
 }
