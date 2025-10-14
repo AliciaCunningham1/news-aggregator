@@ -4,9 +4,7 @@ const ConfigManager = (function() {
 
     function createInstance() {
         return {
-            theme: 'dark',
-            apiUrl: 'https://newsapi.org/v2/top-headlines',
-            apiKey: 'e0a72113ba364e46883d653ca5d5ac58'
+            theme: 'dark'
         };
     }
 
@@ -22,12 +20,11 @@ const ConfigManager = (function() {
 
 // Module Pattern: NewsFetcher
 const NewsFetcher = (function () {
-    const config = ConfigManager.getInstance();
-    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+    const fetchUrl = 'https://your-netlify-site.netlify.app/.netlify/functions/fetchNews'; // Replace with your deployed function URL
 
     async function fetchArticles() {
         try {
-            const response = await fetch(proxyUrl + `${config.apiUrl}?country=us&apiKey=${config.apiKey}`);
+            const response = await fetch(fetchUrl);
             const data = await response.json();
             return data.articles || [];
         } catch (error) {
@@ -68,35 +65,5 @@ const newsFeed = new NewsFeed();
 
 // Observer 1: Update Headline
 function updateHeadline(article) {
-    const headlineElement = document.getElementById('headline')?.querySelector('p');
-    if (headlineElement) headlineElement.textContent = article.title;
-}
-
-// Observer 2: Update Article List
-function updateArticleList(article) {
-    const articleListElement = document.getElementById('articles');
-    if (articleListElement) {
-        const listItem = document.createElement('li');
-        const link = document.createElement('a');
-        link.href = article.url;
-        link.target = '_blank';
-        link.textContent = article.title;
-        listItem.appendChild(link);
-        articleListElement.appendChild(listItem);
-    }
-}
-
-// Subscribe Observers
-newsFeed.subscribe(updateHeadline);
-newsFeed.subscribe(updateArticleList);
-
-// Fetch and display articles
-NewsFetcher.getArticles().then(articles => {
-    articles.forEach(article => newsFeed.addArticle(article));
-});
-
-// Display Config Info
-const configInfo = document.getElementById('configInfo');
-if (configInfo) configInfo.textContent = `Theme: ${ConfigManager.getInstance().theme}`;
-
+    const headlineElement
 
