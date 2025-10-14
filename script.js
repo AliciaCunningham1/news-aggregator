@@ -4,9 +4,7 @@ const ConfigManager = (function() {
 
     function createInstance() {
         return {
-            theme: 'dark',
-            apiUrl: 'https://newsapi.org/v2/top-headlines',
-            apiKey: 'e0a72113ba364e46883d653ca5d5ac58'
+            theme: 'dark'
         };
     }
 
@@ -22,12 +20,11 @@ const ConfigManager = (function() {
 
 // Module Pattern: NewsFetcher
 const NewsFetcher = (function () {
-    const config = ConfigManager.getInstance();
-    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+    const fetchUrl = 'https://your-site.netlify.app/.netlify/functions/fetchNews'; // replace with your function URL
 
     async function fetchArticles() {
         try {
-            const response = await fetch(proxyUrl + `${config.apiUrl}?country=us&apiKey=${config.apiKey}`);
+            const response = await fetch(fetchUrl);
             const data = await response.json();
             return data.articles || [];
         } catch (error) {
