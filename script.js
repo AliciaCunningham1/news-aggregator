@@ -1,3 +1,4 @@
+// Singleton Pattern: ConfigManager
 const ConfigManager = (function() {
     let instance;
 
@@ -19,6 +20,7 @@ const ConfigManager = (function() {
     };
 })();
 
+// Module Pattern: NewsFetcher
 const NewsFetcher = (function () {
     const config = ConfigManager.getInstance();
     const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
@@ -39,6 +41,7 @@ const NewsFetcher = (function () {
     };
 })();
 
+// Observer Pattern: NewsFeed
 function NewsFeed() {
     this.observers = [];
     this.articles = [];
@@ -60,13 +63,16 @@ NewsFeed.prototype = {
     }
 };
 
+// Instantiate the NewsFeed
 const newsFeed = new NewsFeed();
 
+// Observer 1: Update Headline
 function updateHeadline(article) {
     const headlineElement = document.getElementById('headline')?.querySelector('p');
     if (headlineElement) headlineElement.textContent = article.title;
 }
 
+// Observer 2: Update Article List
 function updateArticleList(article) {
     const articleListElement = document.getElementById('articles');
     if (articleListElement) {
@@ -80,13 +86,16 @@ function updateArticleList(article) {
     }
 }
 
+// Subscribe Observers
 newsFeed.subscribe(updateHeadline);
 newsFeed.subscribe(updateArticleList);
 
+// Fetch and display articles
 NewsFetcher.getArticles().then(articles => {
     articles.forEach(article => newsFeed.addArticle(article));
 });
 
+// Display Config Info
 const configInfo = document.getElementById('configInfo');
 if (configInfo) configInfo.textContent = `Theme: ${ConfigManager.getInstance().theme}`;
 
