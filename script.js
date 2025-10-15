@@ -20,28 +20,14 @@ const ConfigManager = (function() {
 
 // Module Pattern: NewsFetcher
 const NewsFetcher = (function() {
-    // Temporary local data to avoid CORS issues
-    const localArticles = [
-        { title: 'Breaking News 1' },
-        { title: 'Breaking News 2' },
-        { title: 'Breaking News 3' }
-    ];
-
-    // Replace this URL with your Netlify function URL when ready
+    // Replace this URL with your deployed Netlify function URL
     const fetchUrl = 'https://your-netlify-site.netlify.app/.netlify/functions/fetchNews';
 
     async function fetchArticles() {
         try {
-            // Temporary: use local data for testing
-            // Comment out the line below and uncomment fetch() when your API allows CORS
-            return localArticles;
-
-            /*
-            // Live fetch (requires CORS to be allowed on server)
             const response = await fetch(fetchUrl);
             const data = await response.json();
             return data.articles || [];
-            */
         } catch (error) {
             console.log('Error fetching articles:', error);
             return [];
@@ -108,3 +94,4 @@ newsFeed.subscribe(updateArticleList);
     const articles = await NewsFetcher.getArticles();
     articles.forEach(article => newsFeed.addArticle(article));
 })();
+
