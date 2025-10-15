@@ -19,7 +19,7 @@ const ConfigManager = (function() {
 })();
 
 // Module Pattern: NewsFetcher
-const NewsFetcher = (function () {
+const NewsFetcher = (function() {
     const fetchUrl = 'https://your-netlify-site.netlify.app/.netlify/functions/fetchNews'; // Replace with your deployed function URL
 
     async function fetchArticles() {
@@ -67,13 +67,16 @@ const newsFeed = new NewsFeed();
 function updateHeadline(article) {
     const headlineElement = document.getElementById('headline');
     if (headlineElement) {
-        headlineElement.textContent = article.title;
+        headlineElement.innerHTML = `
+            <h2>Latest Headline</h2>
+            <p>${article.title}</p>
+        `;
     }
 }
 
 // Observer 2: Update Article List
 function updateArticleList(article) {
-    const listElement = document.getElementById('article-list');
+    const listElement = document.getElementById('articles'); // matches your <ul id="articles">
     if (listElement) {
         const listItem = document.createElement('li');
         listItem.textContent = article.title;
