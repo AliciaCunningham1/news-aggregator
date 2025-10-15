@@ -31,39 +31,3 @@ const NewsFetcher = (function () {
             console.log('Error fetching articles:', error);
             return [];
         }
-    }
-
-    return {
-        getArticles: fetchArticles
-    };
-})();
-
-// Observer Pattern: NewsFeed
-function NewsFeed() {
-    this.observers = [];
-    this.articles = [];
-}
-
-NewsFeed.prototype = {
-    subscribe: function(observerFn) {
-        this.observers.push(observerFn);
-    },
-    unsubscribe: function(observerFn) {
-        this.observers = this.observers.filter(fn => fn !== observerFn);
-    },
-    notify: function(article) {
-        this.observers.forEach(fn => fn(article));
-    },
-    addArticle: function(article) {
-        this.articles.push(article);
-        this.notify(article);
-    }
-};
-
-// Instantiate the NewsFeed
-const newsFeed = new NewsFeed();
-
-// Observer 1: Update Headline
-function updateHeadline(article) {
-    const headlineElement
-
