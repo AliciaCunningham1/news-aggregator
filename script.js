@@ -31,3 +31,62 @@ const NewsFetcher = (function () {
             console.log('Error fetching articles:', error);
             return [];
         }
+    }
+
+    return {
+        getArticles: fetchArticles
+    };
+})();
+
+// Observer Pattern: NewsFeed
+function NewsFeed() {
+    this.observers = [];
+    this.articles = [];
+}
+
+NewsFeed.prototype = {
+    subscribe: function(observerFn) {
+        this.observers.push(observerFn);
+    },
+    unsubscribe: function(observerFn) {
+        this.observers = this.observers.filter(fn => fn !== observerFn);
+    },
+    notify: function(article) {
+        this.observers.forEach(fn => fn(article));
+    },
+    addArticle: function(article) {
+        this.articles.push(article);
+        this.notify(article);
+    }
+};
+
+// Instantiate the NewsFeed
+const newsFeed = new NewsFeed();
+
+// Observer 1: Update Headline
+function updateHeadline(article) {
+    const headlineElement = document.getElementById('headline');
+    if (headlineElement) {
+        headlineElement.textContent = article.title;
+    }
+}
+
+// Observer 2: Update Article List
+function updateArticleList(article) {
+    const listElement = document.getElementById('article-list');
+    if (listElement) {
+        const listItem = document.createElement('li');
+        listItem.textContent = article.title;
+        listElement.appendChild(listItem);
+    }
+}
+
+// Subscribe observers
+newsFeed.subscribe(updateHeadline);
+newsFeed.subscribe(updateArticleList);
+
+// Fetch and add articles
+(async function loadNews() {
+    const articles = await NewsFetcher.getArticles();
+    articles.forEach(article => newsFeed.addArticle(article));
+})();
