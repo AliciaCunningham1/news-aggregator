@@ -76,7 +76,7 @@ function updateHeadline(article) {
 
 // Observer 2: Update Article List
 function updateArticleList(article) {
-    const listElement = document.getElementById('articles'); // matches your <ul id="articles">
+    const listElement = document.getElementById('articles');
     if (listElement) {
         const listItem = document.createElement('li');
         listItem.textContent = article.title;
@@ -93,3 +93,4 @@ newsFeed.subscribe(updateArticleList);
     const articles = await NewsFetcher.getArticles();
     articles.forEach(article => newsFeed.addArticle(article));
 })();
+
