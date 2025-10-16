@@ -1,7 +1,7 @@
 /* script.js
  * News Aggregator Project
  * Uses Singleton, Module, and Observer Patterns
- * Works directly on GitHub Pages with GNews API
+ * Works on GitHub Pages via CORS proxy
  */
 
 // ---------------- Singleton Pattern: ConfigManager ----------------
@@ -31,9 +31,14 @@ const NewsFetcher = (function() {
 
     async function fetchNews() {
         try {
-            const response = await fetch(`${config.apiUrl}${config.apiKey}`);
+            // Wrap the API URL with the CORS proxy
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(config.apiUrl + config.apiKey)}`;
+            const response = await fetch(proxyUrl);
             if (!response.ok) throw new Error('Network response was not ok');
-            const data = await response.json();
+
+            const dataText = await response.json();
+            const data = JSON.parse(dataText.contents); // AllOrigins returns JSON in `contents`
+
             NewsObserver.notify(data.articles);
         } catch (error) {
             console.error('Fetching news failed:', error);
