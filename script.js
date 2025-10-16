@@ -24,8 +24,9 @@ const ConfigManager = (function() {
 // Module Pattern: NewsFetcher
 // =======================
 const NewsFetcher = (function() {
-    // Replace this URL with your deployed Netlify function URL
-    const fetchUrl = 'https://your-netlify-site.netlify.app/.netlify/functions/fetchNews';
+    // Replace this URL with your deployed Netlify function URL or API endpoint
+    const apiKey = 'e0a72113ba364e46883d653ca5d5ac58';
+    const fetchUrl = `https://your-netlify-site.netlify.app/.netlify/functions/fetchNews?apiKey=${apiKey}`;
 
     async function fetchArticles() {
         try {
@@ -110,4 +111,3 @@ newsFeed.subscribe(updateArticleList);
     const articles = await NewsFetcher.getArticles();
     articles.forEach(article => newsFeed.addArticle(article));
 })();
-
