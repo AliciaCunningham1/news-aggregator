@@ -1,7 +1,7 @@
 /* script.js
  * News Aggregator Project
  * Uses Singleton, Module, and Observer Patterns
- * Fetches news via a Netlify serverless function
+ * Works directly on GitHub Pages with GNews API
  */
 
 // ---------------- Singleton Pattern: ConfigManager ----------------
@@ -10,7 +10,8 @@ const ConfigManager = (function() {
 
     function createInstance() {
         return {
-            theme: 'light'
+            apiKey: 'b83f9c3dec6f5b8ec2379cc1a188ecde', // Your GNews API key
+            apiUrl: 'https://gnews.io/api/v4/top-headlines?country=us&topic=technology&max=5&token='
         };
     }
 
@@ -26,15 +27,21 @@ const ConfigManager = (function() {
 
 // ---------------- Module Pattern: NewsFetcher ----------------
 const NewsFetcher = (function() {
+    const config = ConfigManager.getInstance();
+
     async function fetchNews() {
         try {
-            // Fetch from Netlify function instead of NewsAPI directly
-            const response = await fetch('/.netlify/functions/fetchNews');
+            const response = await fetch(`${config.apiUrl}${config.apiKey}`);
             if (!response.ok) throw new Error('Network response was not ok');
             const data = await response.json();
             NewsObserver.notify(data.articles);
         } catch (error) {
             console.error('Fetching news failed:', error);
+            const headlineContainer = document.getElementById('headline');
+            if (headlineContainer) {
+                const p = headlineContainer.querySelector('p');
+                if (p) p.textContent = 'Failed to load news.';
+            }
         }
     }
 
@@ -83,6 +90,13 @@ function displayArticles(articles) {
     if (!articleList) return;
 
     articleList.innerHTML = ''; // Clear previous articles
+    if (articles.length === 0) {
+        const li = document.createElement('li');
+        li.textContent = 'No articles available.';
+        articleList.appendChild(li);
+        return;
+    }
+
     articles.forEach(article => {
         const li = document.createElement('li');
         li.innerHTML = `
