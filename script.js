@@ -6,7 +6,7 @@
  */
 
 // =======================
-// Singleton Pattern: ConfigManager
+// 1. Singleton Pattern: ConfigManager
 // =======================
 const ConfigManager = (function() {
     let instance;
@@ -14,7 +14,6 @@ const ConfigManager = (function() {
     function createInstance() {
         return {
             theme: 'dark',
-            // This URL should point to your Netlify function proxy
             apiProxyUrl: 'https://your-netlify-site.netlify.app/.netlify/functions/fetchNews'
         };
     }
@@ -30,7 +29,7 @@ const ConfigManager = (function() {
 })();
 
 // =======================
-// Module Pattern: NewsFetcher
+// 2. Module Pattern: NewsFetcher
 // =======================
 const NewsFetcher = (function() {
     const config = ConfigManager.getInstance();
@@ -38,6 +37,8 @@ const NewsFetcher = (function() {
     async function fetchArticles() {
         try {
             console.log('Fetching articles from proxy:', config.apiProxyUrl);
+
+            // Line 36 - fetch response
             const response = await fetch(config.apiProxyUrl);
 
             if (!response.ok) {
@@ -47,11 +48,10 @@ const NewsFetcher = (function() {
             const data = await response.json();
             console.log('Data received:', data);
 
-            // Return articles or fallback
             return data.articles || fallbackArticles;
         } catch (error) {
             console.error('Error fetching articles:', error);
-            return fallbackArticles; // fallback if fetch fails
+            return fallbackArticles;
         }
     }
 
@@ -61,7 +61,7 @@ const NewsFetcher = (function() {
 })();
 
 // =======================
-// Observer Pattern: NewsFeed
+// 3. Observer Pattern: NewsFeed
 // =======================
 function NewsFeed() {
     this.observers = [];
@@ -85,12 +85,12 @@ NewsFeed.prototype = {
 };
 
 // =======================
-// Instantiate NewsFeed
+// 4. Instantiate NewsFeed
 // =======================
 const newsFeed = new NewsFeed();
 
 // =======================
-// Observer 1: Update Headline
+// 5. Observer 1: Update Headline
 // =======================
 function updateHeadline(article) {
     const headlineElement = document.getElementById('headline');
@@ -100,7 +100,7 @@ function updateHeadline(article) {
 }
 
 // =======================
-// Observer 2: Update Article List
+// 6. Observer 2: Update Article List
 // =======================
 function updateArticleList(article) {
     const articleListElement = document.getElementById('articles');
@@ -112,13 +112,13 @@ function updateArticleList(article) {
 }
 
 // =======================
-// Subscribe Observers
+// 7. Subscribe Observers
 // =======================
 newsFeed.subscribe(updateHeadline);
 newsFeed.subscribe(updateArticleList);
 
 // =======================
-// Fallback articles (if API fails)
+// 8. Fallback articles if fetch fails
 // =======================
 const fallbackArticles = [
     { title: "Fallback Article 1" },
@@ -127,18 +127,8 @@ const fallbackArticles = [
 ];
 
 // =======================
-// Fetch and display articles
+// 9. Fetch and display articles
 // =======================
 (async function loadNews() {
     const articles = await NewsFetcher.getArticles();
-    articles.forEach(article => newsFeed.addArticle(article));
-})();
-
-// =======================
-// Display Config Info
-// =======================
-const configInfo = ConfigManager.getInstance();
-const configElement = document.getElementById('configInfo');
-if (configElement) {
-    configElement.textContent = `Theme: ${configInfo.theme}`;
-}
+    articles.forEach(article => newsFeed.addArticle(article))
