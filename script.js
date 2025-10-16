@@ -1,11 +1,8 @@
 /*
  * JavaScript Boilerplate for News Aggregator Project
  *
- * This JavaScript file is part of the Web APIs assignment.
- * Your task is to complete the functions with appropriate module pattern, observer pattern, singleton pattern.
- *
- * Follow the TODO prompts and complete each section to ensure the
- * News Aggregator App works as expected.
+ * Uses Singleton, Module, and Observer patterns.
+ * Fetches articles via a serverless function to avoid exposing the API key.
  */
 
 // =======================
@@ -17,8 +14,8 @@ const ConfigManager = (function() {
     function createInstance() {
         return {
             theme: 'dark',
-            apiUrl: 'https://newsapi.org/v2/top-headlines',
-            apiKey: 'e0a72113ba364e46883d653ca5d5ac58' // Your NewsAPI key
+            // This URL should point to your Netlify function proxy
+            apiProxyUrl: 'https://your-netlify-site.netlify.app/.netlify/functions/fetchNews'
         };
     }
 
@@ -28,7 +25,7 @@ const ConfigManager = (function() {
     }
 
     return {
-        getInstance: getInstance
+        getInstance
     };
 })();
 
@@ -39,11 +36,9 @@ const NewsFetcher = (function() {
     const config = ConfigManager.getInstance();
 
     async function fetchArticles() {
-        const url = `${config.apiUrl}?country=us&apiKey=${config.apiKey}`;
         try {
-            console.log('Fetching articles from:', url);
-            const response = await fetch(url);
-            console.log('Response status:', response.status);
+            console.log('Fetching articles from proxy:', config.apiProxyUrl);
+            const response = await fetch(config.apiProxyUrl);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -51,10 +46,12 @@ const NewsFetcher = (function() {
 
             const data = await response.json();
             console.log('Data received:', data);
-            return data.articles || [];
+
+            // Return articles or fallback
+            return data.articles || fallbackArticles;
         } catch (error) {
             console.error('Error fetching articles:', error);
-            return [];
+            return fallbackArticles; // fallback if fetch fails
         }
     }
 
@@ -119,6 +116,15 @@ function updateArticleList(article) {
 // =======================
 newsFeed.subscribe(updateHeadline);
 newsFeed.subscribe(updateArticleList);
+
+// =======================
+// Fallback articles (if API fails)
+// =======================
+const fallbackArticles = [
+    { title: "Fallback Article 1" },
+    { title: "Fallback Article 2" },
+    { title: "Fallback Article 3" }
+];
 
 // =======================
 // Fetch and display articles
