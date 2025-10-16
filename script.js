@@ -1,6 +1,7 @@
 /* script.js
  * News Aggregator Project
  * Uses Singleton, Module, and Observer Patterns
+ * Fetches news via a Netlify serverless function
  */
 
 // ---------------- Singleton Pattern: ConfigManager ----------------
@@ -9,8 +10,6 @@ const ConfigManager = (function() {
 
     function createInstance() {
         return {
-            apiKey: 'e0a72113ba364e46883d653ca5d5ac58', // Your API key
-            apiUrl: 'https://newsapi.org/v2/top-headlines?country=us&category=technology&pageSize=5&apiKey=',
             theme: 'light'
         };
     }
@@ -27,11 +26,10 @@ const ConfigManager = (function() {
 
 // ---------------- Module Pattern: NewsFetcher ----------------
 const NewsFetcher = (function() {
-    const config = ConfigManager.getInstance();
-
     async function fetchNews() {
         try {
-            const response = await fetch(`${config.apiUrl}${config.apiKey}`);
+            // Fetch from Netlify function instead of NewsAPI directly
+            const response = await fetch('/.netlify/functions/fetchNews');
             if (!response.ok) throw new Error('Network response was not ok');
             const data = await response.json();
             NewsObserver.notify(data.articles);
@@ -69,33 +67,35 @@ const NewsObserver = (function() {
 })();
 
 // ---------------- DOM Manipulation Functions ----------------
-function displayHeadlines(articles) {
-    const headlineContainer = document.getElementById('headlines');
-    headlineContainer.innerHTML = ''; // Clear previous headlines
-    articles.forEach(article => {
-        const li = document.createElement('li');
-        li.textContent = article.title;
-        headlineContainer.appendChild(li);
-    });
+function displayHeadline(articles) {
+    const headlineContainer = document.getElementById('headline');
+    if (!headlineContainer) return;
+
+    const headlineText = articles.length > 0 ? articles[0].title : 'No articles yet...';
+    const p = headlineContainer.querySelector('p');
+    if (p) {
+        p.textContent = headlineText;
+    }
 }
 
 function displayArticles(articles) {
-    const articleContainer = document.getElementById('articles');
-    articleContainer.innerHTML = ''; // Clear previous articles
+    const articleList = document.getElementById('articles');
+    if (!articleList) return;
+
+    articleList.innerHTML = ''; // Clear previous articles
     articles.forEach(article => {
-        const div = document.createElement('div');
-        div.className = 'article';
-        div.innerHTML = `
-            <h3>${article.title}</h3>
-            <p>${article.description || ''}</p>
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <strong>${article.title}</strong><br>
+            ${article.description || ''} <br>
             <a href="${article.url}" target="_blank">Read more</a>
         `;
-        articleContainer.appendChild(div);
+        articleList.appendChild(li);
     });
 }
 
 // ---------------- Subscribe DOM functions to NewsObserver ----------------
-NewsObserver.subscribe(displayHeadlines);
+NewsObserver.subscribe(displayHeadline);
 NewsObserver.subscribe(displayArticles);
 
 // ---------------- Initialize ----------------
