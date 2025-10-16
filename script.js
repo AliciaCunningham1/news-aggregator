@@ -1,3 +1,13 @@
+/*
+ * JavaScript Boilerplate for News Aggregator Project
+ *
+ * This JavaScript file is part of the Web APIs assignment.
+ * Your task is to complete the functions with appropriate module pattern, observer pattern, singleton pattern.
+ *
+ * Follow the TODO prompts and complete each section to ensure the
+ * News Aggregator App works as expected.
+ */
+
 // =======================
 // Singleton Pattern: ConfigManager
 // =======================
@@ -6,7 +16,9 @@ const ConfigManager = (function() {
 
     function createInstance() {
         return {
-            theme: 'dark'
+            theme: 'dark',
+            apiUrl: 'https://newsapi.org/v2/top-headlines',
+            apiKey: 'e0a72113ba364e46883d653ca5d5ac58' // Your NewsAPI key
         };
     }
 
@@ -24,14 +36,21 @@ const ConfigManager = (function() {
 // Module Pattern: NewsFetcher
 // =======================
 const NewsFetcher = (function() {
-    // Replace this URL with your deployed Netlify function URL or API endpoint
-    const apiKey = 'e0a72113ba364e46883d653ca5d5ac58';
-    const fetchUrl = `https://your-netlify-site.netlify.app/.netlify/functions/fetchNews?apiKey=${apiKey}`;
+    const config = ConfigManager.getInstance();
 
     async function fetchArticles() {
+        const url = `${config.apiUrl}?country=us&apiKey=${config.apiKey}`;
         try {
-            const response = await fetch(fetchUrl);
+            console.log('Fetching articles from:', url);
+            const response = await fetch(url);
+            console.log('Response status:', response.status);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const data = await response.json();
+            console.log('Data received:', data);
             return data.articles || [];
         } catch (error) {
             console.error('Error fetching articles:', error);
@@ -79,10 +98,7 @@ const newsFeed = new NewsFeed();
 function updateHeadline(article) {
     const headlineElement = document.getElementById('headline');
     if (headlineElement) {
-        headlineElement.innerHTML = `
-            <h2>Latest Headline</h2>
-            <p>${article.title}</p>
-        `;
+        headlineElement.innerHTML = `<p>${article.title}</p>`;
     }
 }
 
@@ -90,24 +106,33 @@ function updateHeadline(article) {
 // Observer 2: Update Article List
 // =======================
 function updateArticleList(article) {
-    const listElement = document.getElementById('articles');
-    if (listElement) {
+    const articleListElement = document.getElementById('articles');
+    if (articleListElement) {
         const listItem = document.createElement('li');
         listItem.textContent = article.title;
-        listElement.appendChild(listItem);
+        articleListElement.appendChild(listItem);
     }
 }
 
 // =======================
-// Subscribe observers
+// Subscribe Observers
 // =======================
 newsFeed.subscribe(updateHeadline);
 newsFeed.subscribe(updateArticleList);
 
 // =======================
-// Fetch and add articles
+// Fetch and display articles
 // =======================
 (async function loadNews() {
     const articles = await NewsFetcher.getArticles();
     articles.forEach(article => newsFeed.addArticle(article));
 })();
+
+// =======================
+// Display Config Info
+// =======================
+const configInfo = ConfigManager.getInstance();
+const configElement = document.getElementById('configInfo');
+if (configElement) {
+    configElement.textContent = `Theme: ${configInfo.theme}`;
+}
