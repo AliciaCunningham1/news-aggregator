@@ -9,7 +9,7 @@ const ConfigManager = (function() {
 
     function createInstance() {
         return {
-            apiKey: 'YOUR_API_KEY_HERE', // Replace with your API key
+            apiKey: 'e0a72113ba364e46883d653ca5d5ac58', // Your API key
             apiUrl: 'https://newsapi.org/v2/top-headlines?country=us&category=technology&pageSize=5&apiKey=',
             theme: 'light'
         };
