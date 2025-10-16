@@ -1,134 +1,105 @@
-/*
- * JavaScript Boilerplate for News Aggregator Project
- *
- * Uses Singleton, Module, and Observer patterns.
- * Fetches articles via a serverless function to avoid exposing the API key.
+/* script.js
+ * News Aggregator Project
+ * Uses Singleton, Module, and Observer Patterns
  */
 
-// =======================
-// 1. Singleton Pattern: ConfigManager
-// =======================
+// ---------------- Singleton Pattern: ConfigManager ----------------
 const ConfigManager = (function() {
     let instance;
 
     function createInstance() {
         return {
-            theme: 'dark',
-            apiProxyUrl: 'https://your-netlify-site.netlify.app/.netlify/functions/fetchNews'
+            apiKey: 'YOUR_API_KEY_HERE', // Replace with your API key
+            apiUrl: 'https://newsapi.org/v2/top-headlines?country=us&category=technology&pageSize=5&apiKey=',
+            theme: 'light'
         };
     }
 
-    function getInstance() {
-        if (!instance) instance = createInstance();
-        return instance;
-    }
-
     return {
-        getInstance
+        getInstance: function() {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
     };
 })();
 
-// =======================
-// 2. Module Pattern: NewsFetcher
-// =======================
+// ---------------- Module Pattern: NewsFetcher ----------------
 const NewsFetcher = (function() {
     const config = ConfigManager.getInstance();
 
-    async function fetchArticles() {
+    async function fetchNews() {
         try {
-            console.log('Fetching articles from proxy:', config.apiProxyUrl);
-
-            // Line 36 - fetch response
-            const response = await fetch(config.apiProxyUrl);
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
+            const response = await fetch(`${config.apiUrl}${config.apiKey}`);
+            if (!response.ok) throw new Error('Network response was not ok');
             const data = await response.json();
-            console.log('Data received:', data);
-
-            return data.articles || fallbackArticles;
+            NewsObserver.notify(data.articles);
         } catch (error) {
-            console.error('Error fetching articles:', error);
-            return fallbackArticles;
+            console.error('Fetching news failed:', error);
         }
     }
 
     return {
-        getArticles: fetchArticles
+        fetchNews
     };
 })();
 
-// =======================
-// 3. Observer Pattern: NewsFeed
-// =======================
-function NewsFeed() {
-    this.observers = [];
-    this.articles = [];
+// ---------------- Observer Pattern: NewsObserver ----------------
+const NewsObserver = (function() {
+    let observers = [];
+
+    function subscribe(fn) {
+        observers.push(fn);
+    }
+
+    function unsubscribe(fn) {
+        observers = observers.filter(sub => sub !== fn);
+    }
+
+    function notify(data) {
+        observers.forEach(fn => fn(data));
+    }
+
+    return {
+        subscribe,
+        unsubscribe,
+        notify
+    };
+})();
+
+// ---------------- DOM Manipulation Functions ----------------
+function displayHeadlines(articles) {
+    const headlineContainer = document.getElementById('headlines');
+    headlineContainer.innerHTML = ''; // Clear previous headlines
+    articles.forEach(article => {
+        const li = document.createElement('li');
+        li.textContent = article.title;
+        headlineContainer.appendChild(li);
+    });
 }
 
-NewsFeed.prototype = {
-    subscribe: function(observerFn) {
-        this.observers.push(observerFn);
-    },
-    unsubscribe: function(observerFn) {
-        this.observers = this.observers.filter(fn => fn !== observerFn);
-    },
-    notify: function(article) {
-        this.observers.forEach(fn => fn(article));
-    },
-    addArticle: function(article) {
-        this.articles.push(article);
-        this.notify(article);
-    }
-};
-
-// =======================
-// 4. Instantiate NewsFeed
-// =======================
-const newsFeed = new NewsFeed();
-
-// =======================
-// 5. Observer 1: Update Headline
-// =======================
-function updateHeadline(article) {
-    const headlineElement = document.getElementById('headline');
-    if (headlineElement) {
-        headlineElement.innerHTML = `<p>${article.title}</p>`;
-    }
+function displayArticles(articles) {
+    const articleContainer = document.getElementById('articles');
+    articleContainer.innerHTML = ''; // Clear previous articles
+    articles.forEach(article => {
+        const div = document.createElement('div');
+        div.className = 'article';
+        div.innerHTML = `
+            <h3>${article.title}</h3>
+            <p>${article.description || ''}</p>
+            <a href="${article.url}" target="_blank">Read more</a>
+        `;
+        articleContainer.appendChild(div);
+    });
 }
 
-// =======================
-// 6. Observer 2: Update Article List
-// =======================
-function updateArticleList(article) {
-    const articleListElement = document.getElementById('articles');
-    if (articleListElement) {
-        const listItem = document.createElement('li');
-        listItem.textContent = article.title;
-        articleListElement.appendChild(listItem);
-    }
-}
+// ---------------- Subscribe DOM functions to NewsObserver ----------------
+NewsObserver.subscribe(displayHeadlines);
+NewsObserver.subscribe(displayArticles);
 
-// =======================
-// 7. Subscribe Observers
-// =======================
-newsFeed.subscribe(updateHeadline);
-newsFeed.subscribe(updateArticleList);
+// ---------------- Initialize ----------------
+document.addEventListener('DOMContentLoaded', () => {
+    NewsFetcher.fetchNews();
+});
 
-// =======================
-// 8. Fallback articles if fetch fails
-// =======================
-const fallbackArticles = [
-    { title: "Fallback Article 1" },
-    { title: "Fallback Article 2" },
-    { title: "Fallback Article 3" }
-];
-
-// =======================
-// 9. Fetch and display articles
-// =======================
-(async function loadNews() {
-    const articles = await NewsFetcher.getArticles();
-    articles.forEach(article => newsFeed.addArticle(article))
